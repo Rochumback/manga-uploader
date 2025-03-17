@@ -14,9 +14,13 @@ from structs import ChapterMetadata, MangaMetadata
 dotenv.load_dotenv()
 
 ROOT: str = os.getenv("MANGAS_ABSOLUTE_PATH")  # type: ignore
+BACKUP_ROOT: str = os.getenv("BACKUPS_PATH")  # type: ignore
 
 if ROOT is None:
     raise ValueError("root path missing")
+
+if BACKUP_ROOT is None:
+    raise ValueError("backup path missing")
 
 
 class Manga:
@@ -77,11 +81,24 @@ class MangaChapter:
 
         root_path = Path(ROOT)
         manga_path = root_path / "mangas" / manga_name
+        self.name = manga_name
         self.__manga_path = manga_path
-        self.chapter_number = chapter_number
         self.__chapter_path = manga_path / "chapters" / str(chapter_number)
+        self.chapter_number = chapter_number
 
         self.__validade_chapter()
+
+    async def __make_backup(self):
+        backup_path = Path(BACKUP_ROOT)
+        manga_path = backup_path / str(self.name)
+        file_path = manga_path / str(self.__file.filename)
+        try:
+            manga_path.mkdir(parents=True)
+        except Exception as _:
+            pass
+        with file_path.open("wb") as file:
+            file_bin = self.__file_bytes
+            file.write(file_bin)
 
     def __validade_chapter(self):
         if not self.__manga_path.exists():
@@ -96,6 +113,7 @@ class MangaChapter:
         self.tmp = TemporaryDirectory()
         folder = await self.__extract_chapter()
         self.workdir = Path(self.tmp.name) / folder
+        await self.__make_backup()
         await self.__save_pages()
 
     async def __save_pages(self):
@@ -125,14 +143,17 @@ class MangaChapter:
     async def __extract_chapter(self):
         workdir = Path(self.tmp.name)
         packed_path = await self.__save_packed_file()
-        extract_path = extract_archive(packed_path, outdir=workdir.absolute().as_posix())
+        extract_path = extract_archive(
+            packed_path, outdir=workdir.absolute().as_posix()
+        )
         return extract_path
 
     async def __save_packed_file(self):
         workdir = Path(self.tmp.name)
-        file = workdir / "file"
+        file = workdir / str(self.__file.filename)
         with file.open(mode="wb") as opened_file:
             file_bytes = await self.__file.read()
+            self.__file_bytes = file_bytes
             opened_file.write(file_bytes)
         return file.absolute().as_posix()
 
