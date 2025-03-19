@@ -133,7 +133,7 @@ class MangaChapter:
             image = Image.open(page_absolute)
             image_new_path = pages_path / page.name
             image_new_absolute = image_new_path.absolute().as_posix()
-            image.save(image_new_absolute)
+            image.save(image_new_absolute, quality=100)
         return list(pages_path.rglob("*.jpg"))
 
     @staticmethod
