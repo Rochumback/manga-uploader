@@ -97,7 +97,7 @@ class MangaChapter:
         except Exception as _:
             pass
         with file_path.open("wb") as file:
-            file_bin = self.__file_bytes
+            file_bin = Path(self.__extracted_file).read_bytes()
             file.write(file_bin)
 
     def __validade_chapter(self):
@@ -153,8 +153,8 @@ class MangaChapter:
         file = workdir / str(self.__file.filename)
         with file.open(mode="wb") as opened_file:
             file_bytes = await self.__file.read()
-            self.__file_bytes = file_bytes
             opened_file.write(file_bytes)
+        self.__extracted_file = file.absolute().as_posix()
         return file.absolute().as_posix()
 
     @staticmethod
