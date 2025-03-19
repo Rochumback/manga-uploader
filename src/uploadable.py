@@ -16,11 +16,15 @@ dotenv.load_dotenv()
 ROOT: str = os.getenv("MANGAS_ABSOLUTE_PATH")  # type: ignore
 BACKUP_ROOT: str = os.getenv("BACKUPS_PATH")  # type: ignore
 
+MAKE_BACKUP = os.getenv("MAKE_BACKUP")
+print(MAKE_BACKUP)
+
 if ROOT is None:
     raise ValueError("root path missing")
 
-if BACKUP_ROOT is None:
-    raise ValueError("backup path missing")
+if MAKE_BACKUP is not None:
+    if BACKUP_ROOT is None:
+        raise ValueError("backup path missing")
 
 
 class Manga:
@@ -113,8 +117,10 @@ class MangaChapter:
         self.tmp = TemporaryDirectory()
         folder = await self.__extract_chapter()
         self.workdir = Path(self.tmp.name) / folder
-        await self.__make_backup()
         await self.__save_pages()
+
+        if MAKE_BACKUP:
+            await self.__make_backup()
 
     async def __save_pages(self):
         workdir = self.workdir
