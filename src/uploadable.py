@@ -7,6 +7,7 @@ import dotenv
 from fastapi import UploadFile
 from patoolib import extract_archive
 from PIL import Image
+from shutil import copyfileobj
 
 from core.utils.constants import SUPPORTED_IMG_TYPES
 from structs import ChapterMetadata, MangaMetadata
@@ -67,9 +68,6 @@ class Manga:
     def __save_manga_image(self) -> None:
         manga_path = self.__manga_path
         manga_image = manga_path / "image"
-        with manga_image.open("wb") as image:
-            image_bytes = self.__image.file.read()
-            image.write(image_bytes)
 
 
 class MangaChapter:
@@ -104,8 +102,7 @@ class MangaChapter:
         except Exception as _:
             pass
         with file_path.open("wb") as file:
-            file_bin = Path(self.__extracted_file).read_bytes()
-            file.write(file_bin)
+            copyfileobj(self.__file.file, file)
 
     def __validade_chapter(self):
         if not self.__manga_path.exists():
@@ -151,7 +148,7 @@ class MangaChapter:
         return file.suffix in SUPPORTED_IMG_TYPES
 
     async def __extract_chapter(self):
-        workdir = Path(self.tmp.name)
+        workdir = Path(self.__tmp.name)
         packed_path = await self.__save_packed_file()
         extract_path = extract_archive(
             packed_path, outdir=workdir.absolute().as_posix()
@@ -159,12 +156,10 @@ class MangaChapter:
         return extract_path
 
     async def __save_packed_file(self):
-        workdir = Path(self.tmp.name)
+        workdir = Path(self.__tmp.name)
         file = workdir / str(self.__file.filename)
         with file.open(mode="wb") as opened_file:
-            file_bytes = await self.__file.read()
-            opened_file.write(file_bytes)
-        self.__extracted_file = file.absolute().as_posix()
+            copyfileobj(self.__file.file, opened_file)
         return file.absolute().as_posix()
 
     @staticmethod
