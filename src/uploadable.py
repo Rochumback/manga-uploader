@@ -19,7 +19,6 @@ ROOT: str = os.getenv("MANGAS_ABSOLUTE_PATH")  # type: ignore
 BACKUP_ROOT: str = os.getenv("BACKUPS_PATH")  # type: ignore
 
 MAKE_BACKUP = os.getenv("MAKE_BACKUP")
-print(MAKE_BACKUP)
 
 if ROOT is None:
     raise ValueError("root path missing")
@@ -138,9 +137,7 @@ class MangaChapter:
         await self.__process_jpeg_images(pages)
 
     def __convert_images(self, pages: list[Path]):
-        print(self.workdir)
         pages_path = self.workdir / "pages"
-        print(pages_path)
         pages_path.mkdir(parents=True)
         for page in pages:
             page_absolute = page.absolute().as_posix()
