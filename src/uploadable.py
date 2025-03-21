@@ -1,6 +1,7 @@
 import asyncio
 import os
 from pathlib import Path
+import shutil
 from tempfile import TemporaryDirectory
 
 import dotenv
@@ -92,6 +93,12 @@ class MangaChapter:
 
     def cleanup(self):
         self.__tmp.cleanup()
+
+    def delete_chapter(self):
+        if self.__chapter_path.exists():
+            chapter_path = self.__chapter_path
+            chapter_absolute = chapter_path.absolute().as_posix()
+            shutil.rmtree(path=chapter_absolute)
 
     async def __make_backup(self):
         backup_path = Path(BACKUP_ROOT)
