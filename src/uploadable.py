@@ -92,6 +92,9 @@ class MangaChapter:
 
         self.__validade_chapter()
 
+    def cleanup(self):
+        self.__tmp.cleanup()
+
     async def __make_backup(self):
         backup_path = Path(BACKUP_ROOT)
         manga_path = backup_path / str(self.name)
@@ -114,13 +117,14 @@ class MangaChapter:
         self.__file = file
 
     async def save_chapter(self):
-        self.tmp = TemporaryDirectory()
+        self.__tmp = TemporaryDirectory()
         folder = await self.__extract_chapter()
-        self.workdir = Path(self.tmp.name) / folder
+        self.workdir = Path(self.__tmp.name) / folder
         await self.__save_pages()
 
         if MAKE_BACKUP:
             await self.__make_backup()
+        self.cleanup()
 
     async def __save_pages(self):
         workdir = self.workdir
