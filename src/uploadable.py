@@ -133,8 +133,14 @@ class MangaChapter:
         workdir = self.workdir
         files = list(workdir.rglob("*"))
         pages = filter(self.__filter_file, files)
-        pages = self.__convert_images(list(pages))
-        await self.__process_jpeg_images(pages)
+        new_pages = self.__convert_images(list(pages))
+        await self.__process_jpeg_images(new_pages)
+        self.__validade_pages(list( pages ), new_pages)
+
+    def __validade_pages(self, pages, new_pages):
+        avif_pages = list(self.__chapter_path.rglob("*.avif"))
+        if len(pages) != len(new_pages) and len(new_pages) != len(avif_pages):
+            raise Exception("Pages conversion error")
 
     def __convert_images(self, pages: list[Path]):
         pages_path = self.workdir / "pages"

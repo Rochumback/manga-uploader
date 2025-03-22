@@ -29,9 +29,14 @@ async def upload(uuid: str, data: UploadFile, response: Response):
         try:
             upload.set_file(data)
             await upload.save_chapter()
-        except Exception as exception:
+        except ValueError as exception:
+            upload.delete_chapter()
             response.status_code = status.HTTP_422_UNPROCESSABLE_ENTITY
             return {"status": "error", "message": str(exception)}
+        except Exception as exception:
+            upload.delete_chapter()
+            raise exception
+
 
     if type(upload) is None:
         response.status_code = status.HTTP_422_UNPROCESSABLE_ENTITY
