@@ -173,20 +173,6 @@ class MangaChapter:
             copyfileobj(self.__file.file, opened_file)
         return file.absolute().as_posix()
 
-    @staticmethod
-    def __get_split_options(path: str):
-        return {
-            "input_folder": path,
-            "split_height": 2500,
-            "output_type": ".jpg",
-            "custom_width": -1,
-            "detection_type": "pixel",
-            "detection_senstivity": 90,
-            "lossy_quality": 100,
-            "ignorable_pixels": 5,
-            "scan_line_step": 5,
-        }
-
     async def __process_jpeg_images(self, images: list[Path]):
         out_folder = self.__chapter_path / "pages"
         out_folder.mkdir(parents=True)
