@@ -102,9 +102,9 @@ class MangaChapter:
     async def __make_backup(self):
         backup_path = Path(BACKUP_ROOT)
         manga_path = backup_path / str(self.name)
-        file_path = manga_path / str(self.__file.filename)
+        file_path = manga_path / str(self.chapter_number) / str(self.__file.filename)
         try:
-            manga_path.mkdir(parents=True)
+            file_path.parent.mkdir(parents=True)
         except Exception as _:
             pass
         with file_path.open("wb") as file:
@@ -135,12 +135,6 @@ class MangaChapter:
         pages = filter(self.__filter_file, files)
         new_pages = self.__convert_images(list(pages))
         await self.__process_jpeg_images(new_pages)
-        self.__validade_pages(list( pages ), new_pages)
-
-    def __validade_pages(self, pages, new_pages):
-        avif_pages = list(self.__chapter_path.rglob("*.avif"))
-        if len(pages) != len(new_pages) and len(new_pages) != len(avif_pages):
-            raise Exception("Pages conversion error")
 
     def __convert_images(self, pages: list[Path]):
         pages_path = self.workdir / "pages"
