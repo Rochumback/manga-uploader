@@ -1,1 +1,1 @@
-A simple microsservice to normalize manga pages.
+A simple microservice to normalize manga pages.
